@@ -38,24 +38,28 @@ function visualizeIntervals(input) {
     }
   }
 
-  const range    = max - min;
-  const maxIdx   = Math.max(...groups.map(g => g.length - 1));
-  const labelW   = String(maxIdx).length;
-  const prefixW  = labelW + SEP.length;
+  const SCALE  = 2; // characters per unit-length segment
+  // Each block represents a length-1 segment [v, v+1], so there are (max-min) blocks total
+  const range  = max - min;
+  const maxIdx = Math.max(...groups.map(g => g.length - 1));
+  const labelW = String(maxIdx).length;
+  const prefixW = labelW + SEP.length;
+  const totalW = range * SCALE; // bar width
 
-  // Ruler: show value labels at every 5-unit tick
+  // Ruler: tick labels at integer boundaries (i.e. block edges), every 5 units + min
   function buildRuler() {
-    const chars = Array(range + 1).fill(' ');
+    const chars = Array(totalW + String(max).length + 1).fill(' ');
     for (let i = 0; i <= range; i++) {
       const val = min + i;
-      if (val % 5 === 0) {
+      if (val % 5 === 0 || val === min) {
         const label = String(val);
-        for (let j = 0; j < label.length && i + j <= range; j++) {
-          chars[i + j] = label[j];
+        const pos = i * SCALE;
+        for (let j = 0; j < label.length && pos + j < chars.length; j++) {
+          chars[pos + j] = label[j];
         }
       }
     }
-    return ' '.repeat(prefixW) + chars.join('');
+    return ' '.repeat(prefixW) + chars.join('').trimEnd();
   }
 
   const ruler = buildRuler();
@@ -66,14 +70,13 @@ function visualizeIntervals(input) {
     for (let i = 0; i < group.length; i++) {
       const [s, e] = group[i];
       let bar = '';
-      for (let col = 0; col <= range; col++) {
+      // Block col covers segment [v, v+1]; filled iff that segment is inside [s, e]
+      for (let col = 0; col < range; col++) {
         const v = min + col;
-        bar += (v >= s && v <= e) ? FILLED : EMPTY;
+        bar += ((v >= s && v < e) ? FILLED : EMPTY).repeat(SCALE);
       }
       const label = String(i).padStart(labelW);
       console.log(`${label}${SEP}${bar}  [${s}, ${e}]`);
     }
   }
 }
-
-module.exports = { visualizeIntervals };
