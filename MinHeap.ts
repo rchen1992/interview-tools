@@ -1,9 +1,24 @@
 class MinHeap {
   private heap: number[] = [];
 
-  private parent(i: number) { return Math.floor((i - 1) / 2); }
-  private left(i: number) { return 2 * i + 1; }
-  private right(i: number) { return 2 * i + 2; }
+  constructor(arr?: number[]) {
+    if (arr) {
+      this.heap = [...arr];
+      for (let i = Math.floor(this.heap.length / 2) - 1; i >= 0; i--) {
+        this.siftDown(i);
+      }
+    }
+  }
+
+  private parent(i: number) {
+    return Math.floor((i - 1) / 2);
+  }
+  private left(i: number) {
+    return 2 * i + 1;
+  }
+  private right(i: number) {
+    return 2 * i + 2;
+  }
 
   private swap(i: number, j: number) {
     [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
@@ -37,12 +52,18 @@ class MinHeap {
 
   private siftDown(i: number) {
     let smallest = i;
-    const l = this.left(i), r = this.right(i), n = this.heap.length;
+    const l = this.left(i),
+      r = this.right(i),
+      n = this.heap.length;
     if (l < n && this.heap[l] < this.heap[smallest]) smallest = l;
     if (r < n && this.heap[r] < this.heap[smallest]) smallest = r;
     if (smallest !== i) {
       this.swap(i, smallest);
       this.siftDown(smallest);
     }
+  }
+
+  debug() {
+    console.log(this.heap);
   }
 }
